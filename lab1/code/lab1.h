@@ -7,7 +7,7 @@ using namespace std;
 
 char h_alphabet[28] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ*";
 char l_alphabet[28] = "abcdefghijklmnopqrstuvwxyz*";
-char maplist[28]="uvwxyzpqrstklmnofghijabcde*";
+
 
 int freq[26];
 float perc[26];
@@ -56,13 +56,14 @@ void anticryp(char *crypt)
     return;
 }
 
-void map(char* buffer, char* result)
+void map(char* maplist,char* buffer, char* result)
 {
     int len=strlen(buffer);
     int i=0,j=0;
     while(i<len)
     {
-        result[i]=maplist[trans(buffer[i])];
+        if(buffer[i]==' ')result[i]=' ';
+        else result[i]=maplist[trans(buffer[i])];
         i++;
     }
     result[len]='\0';
@@ -81,6 +82,23 @@ void stat(char* buffer)
     for(int i=0;i<26;i++)
     {
         perc[i]=100*(float(freq[i])/len);
-        cout<<l_alphabet[i]<<"\t\t"<<freq[i]<<"\t\t"<<setiosflags(ios::fixed)<<setprecision(4)<<perc[i] <<" \%"<<endl;
-    }     
+        cout<<l_alphabet[i]<<"\t\t"<<freq[i]<<"\t\t";
+        cout<<setiosflags(ios::fixed)<<setprecision(4)<<perc[i] <<" \%"<<endl;
+    }
+    return;
 }
+
+void change(char* buffer,bool *flag, char ori, char newtest)
+{
+    int len=strlen(buffer);
+    for(int i=0;i<len;i++)
+    {
+        if((int(buffer[i])==int(ori))&&flag[i]==true) 
+        {
+            buffer[i]=newtest;
+            flag[i]=false;
+        }
+    }
+    return;
+}
+
