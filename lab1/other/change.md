@@ -1,3 +1,0 @@
-ST,IH,CE,NA(SIC->THE,SINS->THAT)
-MO(SM->TO)
-

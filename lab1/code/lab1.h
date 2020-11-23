@@ -24,6 +24,11 @@ int trans(char alphabet)
     return 26;
 }
 
+char low(char ori)
+{
+    return l_alphabet[trans(ori)];
+}
+
 char deal(char ori, int offset)
 {
     if(trans(ori)!=26)
@@ -56,14 +61,17 @@ void anticryp(char *crypt)
     return;
 }
 
-void map(char* maplist,char* buffer, char* result)
+void map(char* orilist,char* maplist,char* buffer, char* result)
 {
     int len=strlen(buffer);
-    int i=0,j=0;
+    int i=0;
     while(i<len)
     {
         if(buffer[i]==' ')result[i]=' ';
-        else result[i]=maplist[trans(buffer[i])];
+        for(int j=0;j<26;j++) 
+        {
+            if(buffer[i]==orilist[j]) result[i]=maplist[j];
+        }
         i++;
     }
     result[len]='\0';
@@ -93,10 +101,10 @@ void change(char* buffer,bool *flag, char ori, char newtest)
     int len=strlen(buffer);
     for(int i=0;i<len;i++)
     {
-        if((int(buffer[i])==int(ori))&&flag[i]==true) 
+        if((int(buffer[i])==int(ori))&&(flag[i]==true)&&((ori!=newtest) )) 
         {
-            buffer[i]=newtest;
             flag[i]=false;
+            buffer[i]=low(newtest);
         }
     }
     return;
