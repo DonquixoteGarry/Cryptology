@@ -1,13 +1,9 @@
-#include "mydes.h"
+#include "des.h"
 #include <iostream>
 #include <string>
-/**********对于数据初始置换过程的声明****************/
-
-//数据初始置换表
-
 using namespace std;
 
-int main(void)
+int main()
 {
 	while (1) 
 	{	
@@ -74,10 +70,8 @@ int main(void)
 				
 				int change = 0;
 				for (int j = 0; j <= binenpt.length(); j++)
-				{
-					
 					if (binenpt1[j] != binenpt[j]) change++;
-				}
+					
 				cout << "plaintext changed " << i + 1 << " bits " << ",cryped_text changed "<<change<<" bits"<<endl;;
 				total += change;
 			}
@@ -95,11 +89,10 @@ int main(void)
 				enpt1 = des1.encrypt(plaintext, "0x", "0x");
 				binenpt1 = des1.hexToBinary(enpt1);
 				binenpt = des1.hexToBinary(enpt);
+
 				int change = 0;
 				for (int j = 0; j <= 63; j++)
-				{
 					if (binenpt1[j] != binenpt[j]) change++;
-				}
 
 				cout << "key changed " << i + 1 << " bits" << ",cryped_text " << change<<" bits" << endl;;
 				total += change;
