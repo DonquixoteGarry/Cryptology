@@ -8,16 +8,36 @@ using namespace std;
 class DES
 {
 public:
-	int des_plaintext[64], des_encrypt_text[64], des_key[64];           //plain, enpt, key: 最近的明文和密文，密钥
+	int des_plaintext[64], des_encrypt_text[64], des_key[64];
 	bool des_key_is_set;
+	map<char, string> hex_binary_map;
+	map<string, string> binary_hex_map;
+	DES()
+	{
+		des_key_is_set = false;
+
+		hex_binary_map['0'] = "0000"; hex_binary_map['1'] = "0001"; hex_binary_map['2'] = "0010"; 
+		hex_binary_map['3'] = "0011"; hex_binary_map['4'] = "0100"; hex_binary_map['5'] = "0101"; 
+		hex_binary_map['6'] = "0110"; hex_binary_map['7'] = "0111"; hex_binary_map['8'] = "1000"; 
+		hex_binary_map['9'] = "1001"; hex_binary_map['A'] = "1010"; hex_binary_map['B'] = "1011"; 
+		hex_binary_map['C'] = "1100"; hex_binary_map['D'] = "1101"; hex_binary_map['E'] = "1110"; 
+		hex_binary_map['F'] = "1111"; hex_binary_map['a'] = "1010"; hex_binary_map['b'] = "1011"; 
+		hex_binary_map['c'] = "1100"; hex_binary_map['d'] = "1101"; hex_binary_map['e'] = "1110"; 
+		hex_binary_map['f'] = "1111";
+		
+		binary_hex_map["0000"] = "0"; binary_hex_map["0001"] = "1"; binary_hex_map["0010"] = "2"; 
+		binary_hex_map["0011"] = "3"; binary_hex_map["0100"] = "4"; binary_hex_map["0101"] = "5"; 
+		binary_hex_map["0110"] = "6"; binary_hex_map["0111"] = "7"; binary_hex_map["1000"] = "8"; 
+		binary_hex_map["1001"] = "9"; binary_hex_map["1010"] = "a"; binary_hex_map["1011"] = "b"; 
+		binary_hex_map["1100"] = "c"; binary_hex_map["1101"] = "d"; binary_hex_map["1110"] = "e"; 
+		binary_hex_map["1111"] = "f";
+	}
 	
-	DES(){des_key_is_set = false;}
-	
-	// to set the key , type '0b' to input binary key , type '0x' to input hex key
-	void key(string key, string type)
+	// to set the key , type 'bin' to input binary key , type 'hex' to input hex key
+	void set_key(string key, string type)
 	{
 		des_key_is_set = true;
-		if (type == "0x") key = hexToBinary(key);
+		if (type == "hex") key = hex_bin_sub(key);
 		for (int i = 0; i<key.size(); i++)
 			des_key[i] = key[i] - '0';
 		return;
@@ -29,10 +49,10 @@ public:
 	{
 		if (!des_key_is_set)
 		{
-			cout<<"Having not set key for encrypt or decrypt"<<endl;
+			cout<<"no key set yet"<<endl;
 			return 0;
 		}
-		input = (input_type == "0x") ? hexToBinary(input) : input;
+		input = (input_type == "hex") ? hex_bin_sub(input) : input;
 		for (int i = 0; i<input.size(); i++)
 			des_plaintext[i] = input[i] - '0';
 
@@ -42,7 +62,7 @@ public:
 		for (int i = 0; i<64; i++)
 			output.push_back(des_encrypt_text[i] + '0');
 
-		output = (output_type == "0x") ? binToHexto(output) : output;
+		output = (output_type == "hex") ? bin_hex_sub(output) : output;
 		return output;
 	}
 
@@ -52,10 +72,10 @@ public:
 	{
 		if (!des_key_is_set)
 		{
-			cout<<"Having not set key for encrypt or decrypt"<<endl;
+			cout<<"no key set yet"<<endl;
 			return 0;
 		}
-		input = (input_type == "0x") ? hexToBinary(input) : input;
+		input = (input_type == "hex") ? hex_bin_sub(input) : input;
 		for (int i = 0; i<input.size(); i++)
 			des_encrypt_text[i] = input[i] - '0';
 
@@ -65,7 +85,7 @@ public:
 		for (int i = 0; i<64; i++)
 			output.push_back(des_plaintext[i] + '0');
 
-		output = (output_type == "0x") ? binToHexto(output) : output;
+		output = (output_type == "hex") ? bin_hex_sub(output) : output;
 		return output;
 	}
 
@@ -79,18 +99,8 @@ public:
 	}
 
 	//trans the hex text to binary text by a certain map
-	string hexToBinary(string input)
+	string hex_bin_sub(string input)
 	{
-		map<char, string> hex_binary_map;
-		hex_binary_map['0'] = "0000"; hex_binary_map['1'] = "0001"; hex_binary_map['2'] = "0010"; 
-		hex_binary_map['3'] = "0011"; hex_binary_map['4'] = "0100"; hex_binary_map['5'] = "0101"; 
-		hex_binary_map['6'] = "0110"; hex_binary_map['7'] = "0111"; hex_binary_map['8'] = "1000"; 
-		hex_binary_map['9'] = "1001"; hex_binary_map['A'] = "1010"; hex_binary_map['B'] = "1011"; 
-		hex_binary_map['C'] = "1100"; hex_binary_map['D'] = "1101"; hex_binary_map['E'] = "1110"; 
-		hex_binary_map['F'] = "1111"; hex_binary_map['a'] = "1010"; hex_binary_map['b'] = "1011"; 
-		hex_binary_map['c'] = "1100"; hex_binary_map['d'] = "1101"; hex_binary_map['e'] = "1110"; 
-		hex_binary_map['f'] = "1111";
-
 		string output;
 		for (int i = 0; i<input.size(); i++)
 			output += hex_binary_map[input[i]];
@@ -98,16 +108,8 @@ public:
 	}
 
 	//trans the binary text to hex text by a certain map
-	string binToHexto(string input)
+	string bin_hex_sub(string input)
 	{
-		map<string, string> binary_hex_map;
-		binary_hex_map["0000"] = "0"; binary_hex_map["0001"] = "1"; binary_hex_map["0010"] = "2"; 
-		binary_hex_map["0011"] = "3"; binary_hex_map["0100"] = "4"; binary_hex_map["0101"] = "5"; 
-		binary_hex_map["0110"] = "6"; binary_hex_map["0111"] = "7"; binary_hex_map["1000"] = "8"; 
-		binary_hex_map["1001"] = "9"; binary_hex_map["1010"] = "a"; binary_hex_map["1011"] = "b"; 
-		binary_hex_map["1100"] = "c"; binary_hex_map["1101"] = "d"; binary_hex_map["1110"] = "e"; 
-		binary_hex_map["1111"] = "f";
-
 		string output;
 		for (int i = 0; i<input.size() / 4; i++)
 		{
@@ -128,7 +130,7 @@ public:
 	}
 
 	//the E-expand , expand the 32-bit to 48-bit
-	void eSub(const int input[32], int output[48])
+	void e_sub(const int input[32], int output[48])
 	{
 		for (int i = 0; i<48; i++)
 			output[i] = input[E_expand_list[i] - 1];
@@ -165,7 +167,7 @@ public:
 
 	//the S box substitution
 	//trans 48-bit  to 32-bit 
-	void sSub(const int input[48], int output[32])
+	void s_box_sub(const int input[48], int output[32])
 	{	
 		for (int i = 0; i<8; i++)
 		{
@@ -183,7 +185,7 @@ public:
 
 	//the P box substitution
 	//trans 32-bit  to 32-bit 
-	void pSub(const int input[32], int output[32])
+	void p_box_sub(const int input[32], int output[32])
 	{
 		for (int i = 0; i<32; i++)
 			output[i] = input[P_box[i] - 1];
@@ -201,21 +203,21 @@ public:
 	//single-roll encrypt by using key at a certain roll(0-15)
 	//64-bit input divide to two parts (left 32-bit/right 32 bit) and process differently
 	//return two parts of 32-bit text(encrypted)
-	void rollDES(const int left_input[32], const int right_input[32], int left_output[32], int right_output[32], int roll_key[48])
+	void roll_sub(const int left_input[32], const int right_input[32], int left_output[32], int right_output[32], int roll_key[48])
 	{
 		for (int i = 0; i<32; i++) 
 			left_output[i] = right_input[i];
 		
 		int right_input_2[48];
-		eSub(right_input, right_input_2);
+		e_sub(right_input, right_input_2);
 		
 		int right_input_3[48];
 		for (int i = 0; i<48; i++) 
 			right_input_3[i] = right_input_2[i] ^ roll_key[i];
 		
 		int right_input_4[32],right_input_5[32];
-		sSub(right_input_3, right_input_4);
-		pSub(right_input_4, right_input_5);
+		s_box_sub(right_input_3, right_input_4);
+		p_box_sub(right_input_4, right_input_5);
 		
 		int right_input_6[32];
 		for (int i = 0; i<32; i++) 
@@ -241,7 +243,7 @@ public:
 		for (int i = 1; i <= 16; i++)
 		{
 			keyRollSub(i, key, roll_key);
-			rollDES(left_input, right_input, left_output, right_output, roll_key);
+			roll_sub(left_input, right_input, left_output, right_output, roll_key);
 			for (int i = 0; i<32; i++)
 			{
 				left_input[i] = left_output[i];
@@ -276,7 +278,7 @@ public:
 		for (int i = 16; i >= 1; i--)
 		{
 			keyRollSub(i, key, roll_key);   
-			rollDES(left_input, right_input, left_output, right_output, roll_key);
+			roll_sub(left_input, right_input, left_output, right_output, roll_key);
 			for (int i = 0; i<32; i++)
 			{
 				left_input[i] = left_output[i];
