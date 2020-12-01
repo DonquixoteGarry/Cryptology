@@ -98,6 +98,7 @@ int main()
 			cout << endl << "average is changing " << float(change_sum) / 16.00 <<"  bits\n";
 		}
 		if (op_flag == 4) break;
+		system("pause");
 		cout << "\n-----new process going-----\n" << endl;
 	}
 	return 0;
