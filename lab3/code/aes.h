@@ -80,12 +80,56 @@ public:
 		}
 		return output;
 	}
+    
+    //left shift for string (binary) ,as an alternative of "<<"
+    string left_shift(string origin,int shift_step)
+    {
+        string output="00000000";
+        if(shift_step==0) return copy(origin);
+        else
+        {
+            for(int i=0;i<8-shift_step;i++)
+            {
+                output[i]=origin[i+shift_step];
+            }
+        }
+        return output;
+    }
+
+    //xor for string (binary) ,as an alternative of "^"
+    string bin_xor(string bin_op1,string bin_op2)
+    {
+        string output;
+        for(int i=0;i<8;i++)
+        {
+            if(bin_op1[i]==bin_op2[i])
+                output+='0';
+            else
+                output+='1';
+        }
+        return output;
+    }
+
+    //8-bit multiply with 8-bit in GF(8)
+    //input is all 2-hex
+    //return is 8-bit binary
+    string byte_multi(string hex_op1,string hex_op2)
+    {
+        string bin_op1 = hex_bin_sub(hex_op1);
+        string bin_op2 = hex_bin_sub(hex_op2);
+        string output = "00000000";
+        for(int i=0;i<8;i++)
+        {
+            if(bin_op2[7-i]=='1')
+                output=bin_xor(output,left_shift(bin_op1,i));
+        }
+        return output;
+    }
 
     //byte substitution
     //32-hex to 32-hex
     void byte_sub(string input,string output)
     {
-        string output;
         for(int i=0;i<16;i++)
         {
             char temp1,temp2;
@@ -99,12 +143,11 @@ public:
             output += temp_main;
         }
     }
-    
+
     //reversed byte substitution
     //32-hex to 32-hex
     void rev_byte_sub(string input,string output)
     {
-        string output;
         for(int i=0;i<16;i++)
         {
             char temp1,temp2;
@@ -119,6 +162,41 @@ public:
         }
     }
 
+    //row shift substitution
+    //there obey AES-128's rule (below)
+    //32-hex to 32-hex 
+    void row_shift(string input,string output)
+    {
+        for(int i=0;i<16;i++)
+        {
+            for(int j=2*row_shift_list[i];j<2*row_shift_list[i]+2;j++)
+                output+=input[j];
+        }
+    }
 
+    //reversed row shift substitution
+    //there obey AES-128's rule (below)
+    //32-hex to 32-hex
+    void rev_row_shift(string input,string output)
+    {
+        for(int i=0;i<16;i++)
+        {
+            for(int j=2*rev_row_shift_list[i];j<2*rev_row_shift_list[i]+2;j++)
+                output+=input[j];
+        }
+    }
 
+    //column mix substitution
+    //multiply with certain matrix in GF(8),byte with byte,8-bit with 8-bit)
+    //trans 32-hex to 32-hex
+    void column_mix(string input,string output)
+    {
+        for(int i=0;i<4;i++)
+        {
+            for(int j=0;j<4;j++)
+            {
+
+            }
+        }
+    }
 };
