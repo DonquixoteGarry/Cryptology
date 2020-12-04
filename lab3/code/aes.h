@@ -84,14 +84,16 @@ public:
     //left shift for string (binary) ,as an alternative of "<<"
     string left_shift(string origin,int shift_step)
     {
-        string output="00000000";
-        if(shift_step==0) return copy(origin);
+        
+        string output;
+        for(int i=0;i<strlen(origin);i++)
+            output+='0';
+        if(shift_step==0) 
+            return copy(origin);
         else
         {
-            for(int i=0;i<8-shift_step;i++)
-            {
+            for(int i=0;i<strlen(origin)-shift_step;i++)
                 output[i]=origin[i+shift_step];
-            }
         }
         return output;
     }
@@ -100,7 +102,7 @@ public:
     string bin_xor(string bin_op1,string bin_op2)
     {
         string output;
-        for(int i=0;i<8;i++)
+        for(int i=0;i<strlen(bin_op1);i++)
         {
             if(bin_op1[i]==bin_op2[i])
                 output+='0';
@@ -111,8 +113,7 @@ public:
     }
 
     //8-bit multiply with 8-bit in GF(8)
-    //input is all 2-hex
-    //return is 8-bit binary
+    //2-hex,2-hex to 8-bin
     string byte_multi(string hex_op1,string hex_op2)
     {
         string bin_op1 = hex_bin_sub(hex_op1);
@@ -137,7 +138,7 @@ public:
             for(int j=i*2;j<i*2+2;j++)
             {
                 temp1=input[i*2];
-                temp2=input[i*2+1];    
+                temp2=input[i*2+1];
                 temp_main=copy(S_box[hex_order_map[temp1]][hex_order_map[temp2]]);
             }
             output += temp_main;
@@ -186,17 +187,53 @@ public:
         }
     }
 
+    //select certain byte in target row and column
+    //32-hex to 8-bin(selected)
+    string select_byte(string hex_input,int row_order,int column_order)
+    {
+        string output.temp;
+        temp+=hex_input[8*i+2*j];
+        temp+=hex_input[8*i+2*j+1];
+        output=hex_bin_sub(temp);
+        return output;
+    }
+
+    //TODO this code might be wrong(make mistakes about column or row )
     //column mix substitution
     //multiply with certain matrix in GF(8),byte with byte,8-bit with 8-bit)
     //trans 32-hex to 32-hex
     void column_mix(string input,string output)
     {
+        string output;
         for(int i=0;i<4;i++)
         {
             for(int j=0;j<4;j++)
             {
-
+                string temp="00000000";
+                for(int k=0;k<4;k++)
+                    temp=bin_xor(temp,byte_multi(column_mix_list[i][k],column_mix_list[k][j]));
+                output+=bin_hex_sub(temp);
             }
         }
     }
+
+    //TODO similar with column_mix
+    void rev_column_mix(string input,string output)
+    {
+        string output;
+        for(int i=0;i<4;i++)
+        {
+            for(int j=0;j<4;j++)
+            {
+                string temp="00000000";
+                for(int k=0;k<4;k++)
+                    temp=bin_xor(temp,byte_multi(rev_column_mix_list[i][k],rev_column_mix_list[k][j]));
+                output+=bin_hex_sub(temp);
+            }
+        }
+    }
+
+    
+
+
 };
