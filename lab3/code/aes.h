@@ -12,7 +12,10 @@ using namespace std;
 class AES
 {//AES-128
 public:
-    string aes_plaintext,aes_key,aes_encrypt_text;
+    //string aes_plaintext,
+    string aes_key;
+    string aes_44_row_key;
+    //aes_encrypt_text;
     bool aes_key_is_set;
     map<char, string> hex_binary_map;
 	map<string, string> binary_hex_map;
@@ -51,13 +54,14 @@ public:
     {
         aes_key = copy(input_key);
         aes_key_is_set = true;
+        aes_44_row_key=key_extend(aes_key);
     }
     //use to copy
     string copy(string input)
     {
         string output;
         for (int i = 0; i<input.size(); i++)
-			output += input[i];
+			output.push_back([i]);
         return output;
     }
 
@@ -304,6 +308,46 @@ public:
             else   
                 key_44_row+=bin_hex_sub(bin_xor(hex_bin_sub(select_row_key(key_44_row,row-4)),hex_bin_sub(select_row_key(key_44_row,row-1))));
         }
+        return key_44_row;
+    }
+
+    void _aes_encrypt(string _aes_key,string aes_plaintext,string output)
+    {
+        set_key(_aes_key);
+        string temp1=bin_hex_sub(bin_xor(hex_bin_sub(aes_plaintext),hex_bin_sub(_aes_key)));
+        
+        string roll_temp=copy(temp1);
+        for(int i=0;i<9;i++)
+        {
+            roll_temp=byte_sub(roll_temp);
+            roll_temp=row_shift(roll_temp);
+            roll_temp=column_mix(roll_temp);
+            roll_temp=bin_hex_sub(bin_xor(hex_bin_sub(select_roll_key(i)),hex_bin_sub(roll_temp)));
+        }
+
+        string temp2=copy(roll_temp);
+        temp2=byte_sub(temp2);
+        temp2=row_shift(temp2);
+        temp2=bin_hex_sub(bin_xor(hex_bin_sub(select_roll_key(9)),hex_bin_sub(temp2)));
+        output=copy(temp2);
+    }
+
+    void _aes_decrypt(string _aes_key,string aes_plaintext,string output)
+    {
+        set_key(_aes_key);
+        string temp1=bin_hex_sub(bin_xor(hex_bin_sub(aes_plaintext),hex_bin_sub(select_roll_key(9))));
+        temp1=rev_row_shift(temp1);
+        temp1=rev_byte_sub(temp1);
+        
+        string roll_temp=copy(temp1);
+        for(int i=8;i>=0;i--)
+        {
+            roll_temp=bin_hex_sub(bin_xor(hex_bin_sub(select_roll_key(i)),hex_bin_sub(roll_temp)));
+            roll_temp=rev_column_mix(roll_temp);
+            roll_temp=rev_row_shift(roll_temp);
+            roll_temp=rev_byte_sub(roll_temp);
+        }
+        output=copy(roll_temp);
     }
 
 
