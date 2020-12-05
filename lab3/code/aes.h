@@ -213,19 +213,29 @@ public:
     string select_byte(string hex_input,int row_order,int column_order)
     {
         string output,temp;
-        temp+=hex_input[8*i+2*j];
-        temp+=hex_input[8*i+2*j+1];
+        temp+=hex_input[8*row_order+2*column_order];
+        temp+=hex_input[8*row_order+2*column_order+1];
         output=hex_bin_sub(temp);
         return output;
     }
 
     //select certain row in target row
     //32-hex to 8-hex(selected)
-    string select_row(string hex_input,int row_order)
+    string select_row_key(string hex_input,int row_order)
     {
         string output;
         for(int i=0;i<4;i++)
             output+=select_byte(hex_input,row_order,i);
+        return output;
+    }
+
+    //select roll key(128-bin,32-hex,4-row) in 44-row whole key
+    //roll order=0 means first roll key (different from initial 128-bin key)
+    string select_roll_key(string key_44_row,int roll_order)
+    {
+        string output;
+        for(int i=0;i<4;i++)
+            output+=select_row_key(roll_order*4+i+4);
         return output;
     }
 
@@ -268,11 +278,14 @@ public:
 
     //T function to row
     //8-hex(a row) to 8-hex
-    string row_T_func(string input_row)
+    //roll_order is 0 means first roll
+    string row_T_func(string input_row,roll_order)
     {
         string temp1=row_loop_left_shift(input_row,2);
         string temp2=byte_sub(temp1);
-        
+        string temp3=bin_xor(hex_bin_sub(temp2),hex_bin_sub(row_const[roll_order]));
+        string temp4=bin_hex_sub(temp3);
+        return temp4;
     }
 
     //extend the 4-row key to 44-row key
@@ -280,12 +293,16 @@ public:
     string key_extend(string key_4_row)
     {
         string key_44_row=copy(key_4_row);
+        int roll_order=0;
         for(int row=4;row<44;row++)
         {
             if(row%4==0)
-                key_44_row+=bin_hex_sub(bin_xor(hex_bin_sub(select_row(key_44_row,row-4)),hex_bin_sub(row_T_func(select_row(key_44_row,row-1)))));
+            {
+                key_44_row+=bin_hex_sub(bin_xor(hex_bin_sub(select_row_key(key_44_row,row-4)),hex_bin_sub(row_T_func(select_row_key(key_44_row,row-1)),roll_order)));
+                roll_order++;
+            }    
             else   
-                key_44_row+=bin_hex_sub(bin_xor(hex_bin_sub(select_row(key_44_row,row-4)),hex_bin_sub(select_row(key_44_row,row-1))));
+                key_44_row+=bin_hex_sub(bin_xor(hex_bin_sub(select_row_key(key_44_row,row-4)),hex_bin_sub(select_row_key(key_44_row,row-1))));
         }
     }
 
