@@ -3,6 +3,7 @@
 #include <cmath>
 #include <map>
 #include "array.h"
+
 using namespace std;
 
 class DES

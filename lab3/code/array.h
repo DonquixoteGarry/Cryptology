@@ -59,7 +59,7 @@ int rev_row_shift_list[16]=
 				12,9,6,3
             };
 
-string column_mix_list[16]=
+string column_mix_list[4][4]=
 			{
 				"02","01","01","03",
 				"03","02","01","01",
@@ -67,7 +67,7 @@ string column_mix_list[16]=
 				"01","01","03","02",
 			};
 
-string rev_column_mix_list[16]=
+string rev_column_mix_list[4][4]=
 			{
 				"0E","09","0D","0B",
 				"0B","0E","09","0D",
@@ -75,8 +75,8 @@ string rev_column_mix_list[16]=
 				"09","0D","0B","0E",
 			};
 
-row_const[10]=
+string row_const[10]=
 			{
 				"01000000","02000000","04000000","08000000","10000000",
 				"20000000","40000000","80000000","1B000000","36000000",
-			}
+			};
