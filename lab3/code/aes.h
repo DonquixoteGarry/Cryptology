@@ -350,5 +350,21 @@ public:
         output=copy(roll_temp);
     }
 
+    //count how many nyte
+    //32-hex,32-hex to int
+    int change_bit(string origin,string other)
+    {
+        string bin_origin=hex_bin_sub(origin);
+        string bin_other=hex_bin_sub(other);
+
+        count=0;
+        for(int i=0;i<strlen(bin_origin);i++)
+        {
+            if(bin_origin[i]!=bin_other[i])
+                count++;
+        }
+        return count;
+    }
+
 
 };
