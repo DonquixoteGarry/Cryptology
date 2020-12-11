@@ -14,22 +14,30 @@ public:
             value[i]=0;
     }
 
-    void mycopy(big_num* origin)
-    {
-        for(int i=0;i<1024;i++)
-            value[i]=origin->value[i];
-    }
-
-    //roll_order=0 means first append
-    //use to generate 512-bit prime
-    void append(int append_value,int roll_order)
-    {   int temp=append_value;
-        for(int i=15;i>=0;i++)
+    big_num(int _value)
+    {//初始化一个小于65536=2^16的数
+        int temp=_value;
+        for(int i=1024-16;i<1024;i++)
         {
             int temp2=temp;
-            temp=temp%(pow(2,i));
-            if(temp==temp2) value[1024+roll_order*16+15-i]=0;
-            else value[1024+roll_order*16+15-i]=1;
+            temp=temp%int(pow(2,1023-i));
+            if(temp==temp2) value[i]=0;
+            else value[i]=1;
+        }
+        for(int i=0;i<1024-16;i++) value[i]=0;
+    }
+
+    //roll_order=0 means first append,start at bit-512
+    //use to generate 512-bit prime
+    void append(int append_value,int roll_order)
+    {   
+        int temp=append_value;
+        for(int i=0;i<16;i++)
+        {
+            int temp2=temp;
+            temp=temp%int(pow(2,15-i));
+            if(temp==temp2) value[512+roll_order*16+i]=0;
+            else value[512+roll_order*16+i]=1;
         }
     }
 
@@ -65,7 +73,7 @@ public:
             if(temp_sum<0) down=1;
             else down=0;
 
-            if((temp_sum==0)&&(temp_sum=-2) bn3.value[i]=0;
+            if(temp_sum%2==0) bn3.value[i]=0;
             else bn3.value[i]=1;
         }
         return bn3;
@@ -84,14 +92,10 @@ public:
     big_num mul(big_num bn2)
     {
         big_num mul_result;
-        int temp_sum;
         for(int i=0;i<1024;i++)
         {
             if(value[i]==1)
-            {
-                temp_sum=bn2.left_shift(1023-i);
-                mul_result=mul_result.add(temp_sum);
-            }
+                mul_result=mul_result.add(bn2.left_shift(1023-i));
         }
         return mul_result;
     }
@@ -108,25 +112,46 @@ public:
 
     big_num mod(big_num bn2)
     {
+        //this>bn2
         big_num bn3;
-        bn3.mycopy(this);
+        for(int i=0;i<1024;i++)
+            bn3.value[i]=value[i];
         int max_step;
-
+        bool high_bit_get1,high_bit_get2;
+        high_bit_get1=false;
+        high_bit_get2=false;
         for(int i=0;i<1024;i++)
         {
-            if(value[i]) max_step=i;
-            if(bn2.value[i])
+            if(value[i]&&!high_bit_get1) 
             {
+                high_bit_get1=true;
+                max_step=i;
+            }
+            if(bn2.value[i]&&!high_bit_get2)
+            {
+                high_bit_get2=true;
                 max_step=i-max_step;
                 break;
             }
+            if(high_bit_get2&&high_bit_get1)break;
         }
-        for(int i=max_step;i<=0;i--)
+        for(int i=max_step;i>=0;i--)
         {
             if(bn3.more(bn2.left_shift(i)))
-                bn3=bn3.sub(bn2.left_shift(i));
+            {
+                bn3=bn3.sub(bn2.left_shift(i));   
+            }
         }
         return bn3;
+    }
+
+    big_num power(int times)
+    {
+        big_num ori,result;
+        result.value[1023]=1;
+        for(int i=0;i<1024;i++) ori.value[i]=value[i];
+        for(int i=0;i<times;i++) result=result.mul(ori);
+        return result;
     }
 
     bool is_zero()
@@ -136,7 +161,47 @@ public:
         return true;
     }
 
-}
+    void print()
+    {
+        cout<<"value is:\n";
+        for(int i=0;i<256;i++)
+        {
+            int temp=0;
+            for(int j=0;j<4;j++)
+                if(value[4*i+j]) temp+=pow(2,3-j);
+            char ch;
+            if(temp<10) ch='0'+temp;
+            else ch='A'+temp-10;
+            cout<<ch;
+        }
+        cout<<endl;
+    }
+
+    void bin_print()
+    {
+        cout<<"binary-value is:\n";
+        for(int i=0;i<1024;i++)
+        {
+            char ch;
+            if(value[i]) ch='1';
+            else ch='0';
+            cout<<ch;
+        }
+        cout<<endl;
+    }
+
+    bool is_prime(int test_times)
+    {//use Miller-Rabin test
+        int prime_array[10]={2,3,5,7,11,13,17,19,23,29};
+        while(test_times--)
+        {
+            
+
+        }
+
+    }
+
+};
 
 class RSA
 {
@@ -150,16 +215,17 @@ public:
         srand((unsigned)time(NULL));
         for(int i=0;i<32;i++)
         {
-            int oct_num=rand()%65536;
-            big_num.append(oct_num,i);
+            int random_num=rand()%65536;
+            //cout<<"random is"<<oct_num<<endl;
+            the_big_num.append(random_num,i);
         }
-        return big_num;
+        the_big_num.value[512]=1;
+        the_big_num.value[1023]=1;
+        return the_big_num;
     }
-
-
 
     bool prime_test(big_num maybe_prime)
     {
-
+        return maybe_prime.is_prime();
     }
-}
+};
