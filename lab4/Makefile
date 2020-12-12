@@ -6,8 +6,8 @@ tool:
 	./code/rsa.exe
 	rm code/rsa.exe
 0:
-	rm code/rsa.exe
 	rm code/rsa_test.exe
+	rm code/rsa.exe
 test:
 	g++ code/rsa_test.cpp -o code/rsa_test.exe
 	./code/rsa_test.exe

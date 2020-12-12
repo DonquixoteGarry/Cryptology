@@ -15,7 +15,7 @@ public:
     }
 
     big_num(int _value)
-    {//初始化一个小于65536=2^16的数
+    {//init a big_num less than 2^16(65536)
         int temp=_value;
         for(int i=1024-16;i<1024;i++)
         {
@@ -25,6 +25,12 @@ public:
             else value[i]=1;
         }
         for(int i=0;i<1024-16;i++) value[i]=0;
+    }
+
+    void mycopy(big_num copyer)
+    {
+        for(int i=0;i<1024;i++)
+            value[i]=copyer.value[i];
     }
 
     //roll_order=0 means first append,start at bit-512
@@ -110,10 +116,27 @@ public:
         return true;
     }
 
+    bool more(int _other)
+    {//equal is true
+    //most is 65536
+        big_num other(_other);
+        for(int i=0;i<1024;i++)
+        {
+            if(value[i]&&!other.value[i]) return true;
+            if(!value[i]&&other.value[i]) return false;
+        }
+        return true;
+    }
+
     big_num mod(big_num bn2)
     {
         //this>bn2
         big_num bn3;
+        if(bn2.is_zero())
+        {
+            cout<<"\n>>>syntax error:div 0,result set zero\n\n";
+            return bn3; 
+        }
         for(int i=0;i<1024;i++)
             bn3.value[i]=value[i];
         int max_step;
@@ -145,12 +168,71 @@ public:
         return bn3;
     }
 
+    big_num div(big_num bn2)
+    {
+        //this>bn2
+        big_num bn3;
+        if(bn2.is_zero())
+        {
+            cout<<"\n>>>syntax error:div 0,result set zero\n\n";
+            return bn3; 
+        }
+        for(int i=0;i<1024;i++)
+            bn3.value[i]=value[i];
+        int max_step;
+        bool high_bit_get1,high_bit_get2;
+        high_bit_get1=false;
+        high_bit_get2=false;
+        for(int i=0;i<1024;i++)
+        {
+            if(value[i]&&!high_bit_get1) 
+            {
+                high_bit_get1=true;
+                max_step=i;
+            }
+            if(bn2.value[i]&&!high_bit_get2)
+            {
+                high_bit_get2=true;
+                max_step=i-max_step;
+                break;
+            }
+            if(high_bit_get2&&high_bit_get1)break;
+        }
+        big_num div_result;
+        for(int i=max_step;i>=0;i--)
+        {
+            if(bn3.more(bn2.left_shift(i)))
+            {
+                div_result.value[1023-i]=1;
+                bn3=bn3.sub(bn2.left_shift(i));   
+            }
+        }
+        return div_result;;
+    }
+
+
     big_num power(int times)
     {
         big_num ori,result;
         result.value[1023]=1;
-        for(int i=0;i<1024;i++) ori.value[i]=value[i];
-        for(int i=0;i<times;i++) result=result.mul(ori);
+        for(int i=0;i<1024;i++) 
+            ori.value[i]=value[i];
+        for(int i=0;i<times;i++) 
+            result=result.mul(ori);
+        return result;
+    }
+
+    big_num power(big_num times)
+    {
+        big_num ori,result,one(1);
+        result.value[1023]=1;
+        for(int i=0;i<1024;i++) 
+            ori.value[i]=value[i];
+        while(!times.is_zero())
+        {
+            result=result.mul(ori);
+            times=times.sub(one);
+        }
         return result;
     }
 
@@ -161,9 +243,15 @@ public:
         return true;
     }
 
-    void print()
+    void hex_print(string alert="default")
     {
-        cout<<"value is:\n";
+        if(alert!="default")cout<<endl<<alert<<":"<<endl;
+        else cout<<"\nhex-value:"<<endl;
+        if(is_zero())
+        {
+            cout<<"\n>>>value is zero.\n\n";
+            return;
+        }
         for(int i=0;i<256;i++)
         {
             int temp=0;
@@ -177,9 +265,15 @@ public:
         cout<<endl;
     }
 
-    void bin_print()
+    void bin_print(string alert="default")
     {
-        cout<<"binary-value is:\n";
+        if(alert!="default")cout<<endl<<alert<<":"<<endl;
+        else cout<<"\nbin-value:"<<endl;
+        if(is_zero())
+        {
+            cout<<"\n>>>value is zero.\n\n";
+            return;
+        }
         for(int i=0;i<1024;i++)
         {
             char ch;
@@ -190,15 +284,69 @@ public:
         cout<<endl;
     }
 
-    bool is_prime(int test_times)
-    {//use Miller-Rabin test
-        int prime_array[10]={2,3,5,7,11,13,17,19,23,29};
-        while(test_times--)
+    void short_print(string alert="default")
+    {
+        if(alert!="default")cout<<endl<<alert<<":"<<endl;
+        else cout<<"\nshorten-bin-value:"<<endl;
+        if(is_zero())
         {
-            
+            cout<<"\n>>>value is zero.\n\n";
+            return;
+        }
+        int i;
+        for(i=0;;i++)
+        {
+            if(value[i])break;
+        }
+        for(;i<1024;i++)
+        {
+            char ch;
+            if(value[i]) ch='1';
+            else ch='0';
+            cout<<ch;
+        }
+        cout<<endl;
+    }
+
+    bool same(big_num maybe_same)
+    {
+        big_num ori,diff;
+        bool result;
+        for(int i=0;i<1024;i++)
+            ori.value[i]=value[i];
+        diff=ori.sub(maybe_same);
+        result=ori.is_zero();
+        //if(result) cout<<"the same\n";
+        //else cout<<"not the same\n";
+        return result;
+    }
+
+    bool is_prime(int times=21)
+    {   //use Miller-Rabin test
+        //two_times :2's times,is the k of (x=2^k * m)
+        //odd: the odd m of (x=2^k * m)
+        int prime_array[21]={3,5,7,11, 13,17,19,23,29, 31,37,41,43,47, 53,59,61,67,71, 73,79};
+        big_num two_times,odd,ori,temp,temp2;
+        big_num one(1),two(2);
+        for(int i=0;i<1024;i++)
+            ori.value[i]=value[i];
+        temp=ori.sub(one);
+        while(1)
+        {
+            temp2=temp.mod(two);
+            if(temp2.is_zero())
+            {
+                two_times=two_times.add(one);
+                temp=temp.div(two);
+            }
+            else break;
+        }
+        odd.mycopy(temp);
+        bool this_is_prime=false;
+        while(times--)
+        {
 
         }
-
     }
 
 };
