@@ -222,9 +222,10 @@ public:
         return result;
     }
 
-    big_num power(big_num times)
+    big_num power(big_num _times)
     {
-        big_num ori,result,one(1);
+        big_num times,ori,result,one(1);
+        times.mycopy(_times);
         result.value[1023]=1;
         for(int i=0;i<1024;i++) 
             ori.value[i]=value[i];
@@ -321,10 +322,11 @@ public:
         return result;
     }
 
-    bool is_prime(int times=21)
+    bool is_prime(int _times=21)
     {   //use Miller-Rabin test
         //two_times :2's times,is the k of (x=2^k * m)
         //odd: the odd m of (x=2^k * m)
+        //use to big prime>1000
         int prime_array[21]={3,5,7,11, 13,17,19,23,29, 31,37,41,43,47, 53,59,61,67,71, 73,79};
         big_num two_times,odd,ori,temp,temp2;
         big_num one(1),two(2);
@@ -342,11 +344,14 @@ public:
             else break;
         }
         odd.mycopy(temp);
-        bool this_is_prime=false;
-        while(times--)
-        {
-
-        }
+        odd.short_print("odd=");
+        two_times.short_print("time=");
+        //int times=_times;
+        
+        /*
+            code
+        */
+        return true;
     }
 
 };

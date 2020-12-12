@@ -21,11 +21,15 @@ int main()
     big_num b=a.create_512_big_num();
     b.bin_print();
     */
-
+/*
     big_num a(193);
     big_num b(3);
     big_num c=a.power(b);
     c.short_print("c=");
     //big_num a=big_num(48);
-    a.short_print("a=");
+    a.short_print("a=");*/
+    big_num a(197);
+    bool s=a.is_prime();
+    if(s)cout<<"is prime\n";
+    else cout<<"not prime\n";
 }
