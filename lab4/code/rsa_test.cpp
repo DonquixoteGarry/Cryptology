@@ -2,6 +2,7 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include <ctime>
 #include "rsa.h"
 
 int main()
@@ -28,8 +29,16 @@ int main()
     c.short_print("c=");
     //big_num a=big_num(48);
     a.short_print("a=");*/
-    big_num a(197);
+
+    int aa=clock();
+    cout<<"clock start:"<<aa<<endl;
+    RSA rsa;
+    //big_num a=big_num(9739);
+    big_num a=rsa.create_512_big_num();
     bool s=a.is_prime();
     if(s)cout<<"is prime\n";
     else cout<<"not prime\n";
+    int b=clock();
+    cout<<"clock end:"<<b<<endl;
+    cout<<"cost "<<(b-aa)/1000000<<" s wholely\n";
 }

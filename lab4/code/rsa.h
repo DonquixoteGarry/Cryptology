@@ -88,11 +88,22 @@ public:
     big_num left_shift(int step)
     {
         big_num bn3;
-        for(int i=0;i<1024-step;i++)
-            bn3.value[i]=value[i+step];
-        for(int i=1024-step;i<1024;i++)
-            bn3.value[i]=0;
-        return bn3;
+        if(step>0)
+        {
+            for(int i=0;i<1024-step;i++)
+                bn3.value[i]=value[i+step];
+            for(int i=1024-step;i<1024;i++)
+                bn3.value[i]=0;
+            return bn3;
+        }
+        else
+        {
+            for(int i=0;i<0-step;i++)
+                bn3.value[i]=0;
+            for(int i=0-step;i<1024;i++)
+                bn3.value[i]=value[i+step];
+            return bn3;
+        }
     }
 
     big_num mul(big_num bn2)
@@ -237,6 +248,47 @@ public:
         return result;
     }
 
+    big_num mod_mul(big_num _bn2,big_num mod_num)
+    {
+        big_num answer(0);
+        big_num bn2;
+        big_num result;
+        for(int i=0;i<1024;i++)
+        {
+            bn2.value[i]=_bn2.value[i];
+            result.value[i]=value[i];
+        }
+        while(!bn2.is_zero())
+        {
+            if(bn2.value[1023])
+            {
+                big_num temp=answer.add(result);
+                answer=temp.mod(mod_num);
+            }
+            result=result.left_shift(1);
+            result=result.mod(mod_num);
+            bn2=bn2.left_shift(-1);
+        }
+        return answer;
+    }
+
+    big_num mod_power(big_num _times,big_num mod_num)
+    {
+        big_num times;
+        times.mycopy(_times);
+        big_num answer(1),result;
+        for(int i=0;i<1024;i++)
+            result.value[i]=value[i];
+        while(!times.is_zero())
+        {
+            if(times.value[1023])
+                answer=answer.mod_mul(result,mod_num);
+            result=result.mod_mul(result,mod_num);
+            times=times.left_shift(-1);
+        }
+        return answer;
+    }
+
     bool is_zero()
     {
         for(int i=0;i<1024;i++)
@@ -312,22 +364,22 @@ public:
     bool same(big_num maybe_same)
     {
         big_num ori,diff;
-        bool result;
+        bool result=true;
         for(int i=0;i<1024;i++)
+        {
             ori.value[i]=value[i];
-        diff=ori.sub(maybe_same);
-        result=ori.is_zero();
-        //if(result) cout<<"the same\n";
-        //else cout<<"not the same\n";
+            if(ori.value[i]!=maybe_same.value[i])
+                result=false;
+        }
         return result;
     }
 
-    bool is_prime(int _times=21)
+    bool is_prime(int _times=20)
     {   //use Miller-Rabin test
         //two_times :2's times,is the k of (x=2^k * m)
         //odd: the odd m of (x=2^k * m)
         //use to big prime>1000
-        int prime_array[21]={3,5,7,11, 13,17,19,23,29, 31,37,41,43,47, 53,59,61,67,71, 73,79};
+        int prime_array[21]={3,5,7,11, 13,17,19,23,  29,31,37,41, 43,47,53,59, 61,67,71,73};
         big_num two_times,odd,ori,temp,temp2;
         big_num one(1),two(2);
         for(int i=0;i<1024;i++)
@@ -344,13 +396,24 @@ public:
             else break;
         }
         odd.mycopy(temp);
-        odd.short_print("odd=");
-        two_times.short_print("time=");
-        //int times=_times;
-        
-        /*
-            code
-        */
+        int times=_times;
+        int i=0;
+        big_num _temp;
+        while(i<times)
+        {
+            big_num a(prime_array[i++]);
+            big_num b=a.mod_power(odd,ori);
+            for(big_num j(1);two_times.more(j);j=j.add(one))
+            {
+                _temp=b.mod_mul(b,ori);
+                big_num ori_1=ori.sub(one);
+                if(_temp.same(one)&&!b.same(one)&&!(b.same(ori_1)))
+                    return false;
+                b.mycopy(_temp);
+            }
+            if(!b.same(one))
+                return false;
+        }
         return true;
     }
 
@@ -372,8 +435,17 @@ public:
             //cout<<"random is"<<oct_num<<endl;
             the_big_num.append(random_num,i);
         }
+        while(the_big_num.same(big_num_seed))
+        {
+            for(int i=0;i<32;i++)
+            {
+                int random_num=rand()%65536;
+                the_big_num.append(random_num,i);
+            }   
+        }
         the_big_num.value[512]=1;
         the_big_num.value[1023]=1;
+        big_num_seed.mycopy(the_big_num);
         return the_big_num;
     }
 
