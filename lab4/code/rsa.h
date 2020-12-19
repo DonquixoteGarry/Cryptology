@@ -419,11 +419,63 @@ public:
 
 };
 
+class signed_big_num
+{
+public:
+    bool sign;//(1)>=0 is positive,(0)<0 is negative
+    big_num main_value;
+    signed_big_num() { sign=true; }
+    signed_big_num add(signed_big_num sbn2)
+    {
+        signed_big_num sbn3;
+        big_num temp;
+        if(sign&&sbn2.sign)
+            temp=main_value.add(sbn2.main_value);
+        if(!sign&&!sbn2.sign)
+        {
+            temp=main_value.add(sbn2.main_value);
+            sign=false;
+        }
+        if(!sign&&sbn2.sign)
+        {
+            if(main_value.more(sbn2.main_value))
+            {
+                temp=main_value.sub(sbn2.main_value);
+                sign=false;
+            }
+            else temp=sbn2.main_value.sub(main_value);
+        }
+        if(sign&&!sbn2.sign)
+        {
+            if(sbn2.main_value.more(main_value))
+            {
+                temp=sbn2.main_value.sub(main_value);
+                sign=false;
+            }
+            else temp=main_value.sub(sbn2.main_value);
+        }
+        sbn3.main_value.mycopy(temp);
+        return sbn3;
+    }
+
+    signed_big_num sub(signed_big_num sbn2)
+    {
+        signed_big_num sbn3,temp_sbn1,temp_sbn2;
+        for(int i=0;i<1024;i++)
+            temp_sbn1.value[i]=value[i];
+        temp_sbn1.sign=sign;
+        temp_sbn2.mycopy(sbn2.main_value);
+        temp_sbn2.sign=!sbn2.sign;
+        sbn3=temp_sbn1.add(temp_sbn2);
+    }
+}
+
 class RSA
 {
 public:
     big_num big_num_seed;
     bool seed_is_set;
+    RSA(){seed_is_set=false;}
 
     big_num create_512_big_num()
     {
@@ -432,25 +484,38 @@ public:
         for(int i=0;i<32;i++)
         {
             int random_num=rand()%65536;
-            //cout<<"random is"<<oct_num<<endl;
             the_big_num.append(random_num,i);
         }
-        while(the_big_num.same(big_num_seed))
-        {
-            for(int i=0;i<32;i++)
-            {
-                int random_num=rand()%65536;
-                the_big_num.append(random_num,i);
-            }   
-        }
-        the_big_num.value[512]=1;
-        the_big_num.value[1023]=1;
-        big_num_seed.mycopy(the_big_num);
         return the_big_num;
     }
 
-    bool prime_test(big_num maybe_prime)
+    big_num create_512_prime()
     {
-        return maybe_prime.is_prime();
+        big_num the_big_num;
+        while(1)
+        {
+            if(seed_is_set=false)
+            {
+                the_big_num=create_512_big_num();
+                seed_is_set=true;
+            }
+            else
+            {
+                big_num two(2);
+                the_big_num=big_num_seed.add(two);
+            }
+            the_big_num.value[512]=1;
+            the_big_num.value[1023]=1;
+            big_num_seed.mycopy(the_big_num);
+            if(!the_big_num.is_prime())continue;
+            break;
+        }
+        return the_big_num;
+    }
+
+    big_num inverse_mod(big_num _ori,big_num _mod_num)
+    {//extend-ecuild-algorithm
+
+
     }
 };
