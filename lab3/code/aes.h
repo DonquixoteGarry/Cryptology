@@ -290,7 +290,6 @@ public:
         return output;
     }
 
-    //TODO this code might be wrong(make mistakes about column or row )
     //column mix substitution
     //multiply with certain matrix in GF(8),byte with byte,8-bit with 8-bit)
     //trans 32-hex to 32-hex

@@ -2,6 +2,7 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include "array.h"
 using namespace std;
 
 class big_num
@@ -25,6 +26,19 @@ public:
             else value[i]=1;
         }
         for(int i=0;i<1024-16;i++) value[i]=0;
+    }
+
+    big_num(string value_string)
+    {
+        int len=value_string.size();
+        for(int i=0;i<len;i++)
+        {
+            if(value_string[len-1-i]=='1')
+                value[1023-i]=true;
+            else value[1023-i]=false;
+        }
+        for(int i=0;i<1024-len;i++)
+            value[i]=true;
     }
 
     void mycopy(big_num copyer)
@@ -343,7 +357,7 @@ public:
         else cout<<"\nshorten-bin-value:"<<endl;
         if(is_zero())
         {
-            cout<<"\n>>>value is zero.\n\n";
+            cout<<"\n>>> 0 .\n";
             return;
         }
         int i;
@@ -379,7 +393,6 @@ public:
         //two_times :2's times,is the k of (x=2^k * m)
         //odd: the odd m of (x=2^k * m)
         //use to big prime>1000
-        int prime_array[21]={3,5,7,11, 13,17,19,23,  29,31,37,41, 43,47,53,59, 61,67,71,73};
         big_num two_times,odd,ori,temp,temp2;
         big_num one(1),two(2);
         for(int i=0;i<1024;i++)
@@ -424,7 +437,15 @@ class signed_big_num
 public:
     bool sign;//(1)>=0 is positive,(0)<0 is negative
     big_num main_value;
-    signed_big_num() { sign=true; }
+    signed_big_num() 
+    { 
+        sign=true; 
+    }
+    signed_big_num(big_num big_num_value)
+    {
+        main_value.mycopy(big_num_value);
+        sign=true;
+    }
     signed_big_num add(signed_big_num sbn2)
     {
         signed_big_num sbn3;
@@ -434,14 +455,14 @@ public:
         if(!sign&&!sbn2.sign)
         {
             temp=main_value.add(sbn2.main_value);
-            sign=false;
+            sbn3.sign=false;
         }
         if(!sign&&sbn2.sign)
         {
             if(main_value.more(sbn2.main_value))
             {
                 temp=main_value.sub(sbn2.main_value);
-                sign=false;
+                sbn3.sign=false;
             }
             else temp=sbn2.main_value.sub(main_value);
         }
@@ -450,7 +471,7 @@ public:
             if(sbn2.main_value.more(main_value))
             {
                 temp=sbn2.main_value.sub(main_value);
-                sign=false;
+                sbn3.sign=false;
             }
             else temp=main_value.sub(sbn2.main_value);
         }
@@ -462,13 +483,50 @@ public:
     {
         signed_big_num sbn3,temp_sbn1,temp_sbn2;
         for(int i=0;i<1024;i++)
-            temp_sbn1.value[i]=value[i];
+            temp_sbn1.main_value.value[i]=main_value.value[i];
         temp_sbn1.sign=sign;
-        temp_sbn2.mycopy(sbn2.main_value);
+        temp_sbn2.main_value.mycopy(sbn2.main_value);
         temp_sbn2.sign=!sbn2.sign;
         sbn3=temp_sbn1.add(temp_sbn2);
+        return sbn3;
     }
-}
+
+    signed_big_num mul(big_num bn2)
+    {
+        signed_big_num sbn3;
+        big_num temp_sbn1;
+        for(int i=0;i<1024;i++)
+            temp_sbn1.value[i]=main_value.value[i];
+        sbn3.sign=sign;
+        sbn3.main_value=temp_sbn1.mul(bn2);
+        return sbn3;
+    }
+
+    void short_print(string alert="default")
+    {
+        if(alert!="default")cout<<endl<<alert<<":"<<endl;
+        else cout<<"\nshorten-bin-value:"<<endl;
+        if(main_value.is_zero())
+        {
+            cout<<"\n>>> 0 .\n";
+            return;
+        }
+        if(!sign) cout<<"-";
+        int i;
+        for(i=0;;i++)
+        {
+            if(main_value.value[i])break;
+        }
+        for(;i<1024;i++)
+        {
+            char ch;
+            if(main_value.value[i]) ch='1';
+            else ch='0';
+            cout<<ch;
+        }
+        cout<<endl;
+    }
+};
 
 class RSA
 {
@@ -514,8 +572,35 @@ public:
     }
 
     big_num inverse_mod(big_num _ori,big_num _mod_num)
-    {//extend-ecuild-algorithm
-
-
+    {//extend-ecuild-algorithm 2000-roll
+        signed_big_num x1[2000],x2[2000];
+        big_num one(1),zero(0),x3[2000],q[2000];
+        x3[0].mycopy(_mod_num);
+        x3[1].mycopy(_ori);
+        x1[0].main_value.mycopy(one);
+        x2[0].main_value.mycopy(zero);
+        x1[1].main_value.mycopy(zero);
+        x2[1].main_value.mycopy(one);
+        q[1]=x3[0].div(x3[1]);
+        int last_order;
+        for(int i=2;i<2000;i++)
+        {
+            x3[i]=x3[i-2].mod(x3[i-1]);
+            q[i]=x3[i-1].div(x3[i]);
+            x1[i]=x1[i-2].sub(x1[i-1].mul(q[i-1]));
+            x2[i]=x2[i-2].sub(x2[i-1].mul(q[i-1]));
+            if(x3[i-1].mod(x3[i]).is_zero())
+            {
+                last_order=i;
+                break;
+            }
+            /*
+            q[i].short_print("q=");
+            x1[i].short_print("x1=");
+            x2[i].short_print("x2=");
+            x3[i].short_print("x3=");
+            */
+        }
+        return x2[last_order].main_value;
     }
 };

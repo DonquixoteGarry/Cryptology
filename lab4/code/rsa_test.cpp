@@ -6,40 +6,11 @@
 #include "rsa.h"
 
 int main()
-{/*
-    big_num a(4875);
+{
+    RSA rsa;
+    big_num a(1769),b(550),c;
+    c=rsa.inverse_mod(b,a);
     a.short_print("a=");
-    big_num b(7);
-    //big_num c=a.add(b);
-    //big_num c=a.power(2);
-    //big_num c=a.mod(b);
-    //big_num c=a.sub(b);
-    big_num c=a.div(b);
-    c.short_print("c=");
-    int w=a.same(b);
-    /*
-    RSA a;
-    big_num b=a.create_512_big_num();
-    b.bin_print();
-    */
-/*
-    big_num a(193);
-    big_num b(3);
-    big_num c=a.power(b);
-    c.short_print("c=");
-    //big_num a=big_num(48);
-    a.short_print("a=");*/
-/*
-    int aa=clock();
-    cout<<"clock start:"<<aa<<endl;
-    RSA rsa;
-    //big_num a=big_num(9739);
-    big_num a=rsa.create_512_big_num();
-    bool s=a.is_prime();
-    */
-    RSA rsa;
-    big_num random_num=rsa.create_512_big_num();
-    big_num a(17),b;
-    b=rsa.inverse_mod(a,random_num);
     b.short_print("b=");
+    c.short_print("c=");
 }
