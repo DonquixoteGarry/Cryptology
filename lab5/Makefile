@@ -1,4 +1,4 @@
-.PHONY: tool,0,1
+.PHONY: tool,0,1,test
 tool:
 	./other/hash.exe
 1:
