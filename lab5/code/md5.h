@@ -9,7 +9,7 @@ public:
     unsigned int extend_byte_len,origin_byte_len;
     unsigned int reg_a,reg_b,reg_c,reg_d;
 
-    //left shift the 32-bit x, use in HMD5
+    //left shift the 32-bit unsigned int x, use in HMD5
     unsigned int shift(unsigned int x,int n)
     {
         unsigned int temp1=x<<n;
@@ -32,7 +32,21 @@ public:
             return y^(x|~z);
     }
 
-    //use to trans 32-bit register value to hex-string
+    //subs type 0~3 means different substitution
+    //use to deal with reg b,c,d
+    unsigned int subs(unsigned int i,int subs_type)
+    {
+        if(subs_type==0)
+            return i;
+        if(subs_type==1)
+            return (1+5*i)%16;
+        if(subs_type==2)
+            return (5+3*i)%16;
+        if(subs_type==3)
+            return (7*i)%16;
+    }
+
+    //use to trans 32-bit register value to hex-string to final output
     //hex-string use little-endian mode
     string int_hex_sub(int reg_value)
     {
@@ -90,14 +104,7 @@ public:
         for (unsigned int i = 0; i < 64; i++)
         {
             f=func(b,c,d,i/16);
-            if(i<16)        
-                g=i;
-            if(i<32&&i>=16) 
-                g=(5*i+1)%16;
-            if(i<48&&i>=32) 
-                g=(3*i+5)%16;
-            if(i>=48)       
-                g=(7*i)%16;
+            g=subs(i,i/16);
             temp=d;
             d=c;
             c=b;

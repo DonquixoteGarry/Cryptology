@@ -19,14 +19,17 @@ int main()
         {
             MD5 md5;
             string input;
+            cout<<"please give plaintext(like abc):\n";
             cin>>input;
             string output=md5.encrypt(input);
+            cout<<"cryptedtext:\n";
             cout<<output<<endl;
         }
         if(choose=="2")
         {
             MD5 md5;
             string input;
+            cout<<"please give plaintext(like abc):\n";
             cin>>input;
             string ori_output=md5.encrypt(input);
             cout<<"input="<<input<<endl;
