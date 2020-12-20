@@ -9,6 +9,7 @@ public:
     unsigned int extend_byte_len,origin_byte_len;
     unsigned int reg_a,reg_b,reg_c,reg_d;
 
+    //left shift the 32-bit x, use in HMD5
     unsigned int shift(unsigned int x,int n)
     {
         unsigned int temp1=x<<n;
@@ -17,6 +18,8 @@ public:
         return result;
     }
 
+    //func type 0~3 means F,G,H,I
+    //use to deal with reg b,c,d
     unsigned int func(unsigned int x,unsigned int y,unsigned int z,int func_type)
     {
         if(func_type==0)
@@ -29,6 +32,8 @@ public:
             return y^(x|~z);
     }
 
+    //use to trans 32-bit register value to hex-string
+    //hex-string use little-endian mode
     string int_hex_sub(int reg_value)
     {
         string output;
@@ -47,6 +52,10 @@ public:
         return output;
     }
 
+    //extend vaild length input to 512-bit-type string
+    //first,get origin length
+    //then,fill with 1 and tons of 0
+    //put length into string
     unsigned int* extend(string origin_input)
     {
         unsigned int bit_128_set_num;
@@ -69,6 +78,8 @@ public:
         return extend_input;
     }
 
+    //main process,deal with 4 register
+    //use func to deal ,using different func type
     void HMD5(unsigned int *bit_128_set)
     {
         unsigned int a,b,c,d,f,g,temp;
@@ -99,6 +110,12 @@ public:
         reg_d+=d;
     }
 
+    //whole process
+    //first init register
+    //then extend input string
+    //then HMD5 deal with 4 reg by many rolls
+    //roll's num is 128-bit-set's num
+    //finally 4 register's value trans to hex-string and linked to output
     string encrypt(string plaintext)
     {
         reg_a=reg_init[0];
@@ -117,6 +134,7 @@ public:
         return result;
     }
 
+    //test how many hex-bit changed in output hex-string
     int byte_change(string str1,string str2)
     {
         int change_byte_num=0;

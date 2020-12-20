@@ -44,7 +44,7 @@ int main()
             }
             cout<<"average change "<<double(whole_change)/8<<" bytes\n\n";  
         }
-        else
+        if(choose!="1"&&choose!="2"&&choose!="3")
         {
             cout<<">>>wrong command\n";
         }
